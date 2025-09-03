@@ -6,7 +6,7 @@ const Config = {
 
   // === CONFIGURACIÓN DEL NEGOCIO ===
   negocio: {
-    id: 'barberia0001',
+    id: 'barberia002',
     nombre: 'Barbería Principal',
     configuracion: {
       hora_apertura: '08:00',
