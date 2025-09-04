@@ -433,12 +433,10 @@ document.querySelectorAll('aside nav a').forEach(link => {
 </script>
 <script type="module">
   import { supabase } from './database.js';
-  const negocioId = 'barberia0001';
   try {
     const { data } = await supabase
       .from('configuracion_negocio')
       .select('theme_primary, theme_mode')
-      .eq('negocio_id', negocioId)
       .maybeSingle();
     if (data) {
       if (data.theme_primary) localStorage.setItem('theme_primary', data.theme_primary);

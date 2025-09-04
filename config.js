@@ -1,20 +1,8 @@
 // config.js - Configuración centralizada
 const Config = {
   // === CONFIGURACIÓN DE SUPABASE ===
-  supabaseUrl: 'https://fhequkvqxsbdkmgmoftp.supabase.co', // superbase url
-  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoZXF1a3ZxeHNiZGttZ21vZnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5MTM3NzAsImV4cCI6MjA2OTQ4OTc3MH0.tVXmyBG39oxWJVlmFwHXAaYDBWxakssZ7g-BywmlZEM', // superbase llave
-
-  // === CONFIGURACIÓN DEL NEGOCIO ===
-  negocio: {
-    id: 'barberia002',
-    nombre: 'Barbería Principal',
-    configuracion: {
-      hora_apertura: '08:00',
-      hora_cierre: '23:00',
-      limite_turnos: 50,
-      hora_limite_turnos: '23:00'
-    }
-  },
+  supabaseUrl: 'https://dphouqiyjkuzudwhttep.supabase.co', // superbase url
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaG91cWl5amt1enVkd2h0dGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MzQ4NDUsImV4cCI6MjA3MjUxMDg0NX0.0yb6OIMJNzvvJE5ehMi48hzCsqEiSnXwhmeqbnRd6O4', // superbase llave
 
   // === CONFIGURACIÓN DE RUTAS ===
   routes: {
@@ -40,10 +28,6 @@ const Config = {
     return { url, key };
   },
 
-  getNegocioConfig: function() {
-    return this.negocio;
-  },
-
   getRoute: function(routeName) {
     const route = this.routes[routeName] || routeName;
     return route;
@@ -57,7 +41,6 @@ const Config = {
   getFullConfig: function() {
     return {
       supabase: this.getSupabaseConfig(),
-      negocio: this.getNegocioConfig(),
       routes: this.routes,
       cdn: this.cdn,
       basePath: this.basePath

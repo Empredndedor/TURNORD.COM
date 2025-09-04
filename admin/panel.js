@@ -1,21 +1,5 @@
 // panel.js
 import { supabase } from '../database.js';
-import Config from '../config.js';
-
-let negocioId; // Se obtendrá del usuario autenticado
-
-async function getNegocioId() {
-  if (negocioId) return negocioId;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user && user.user_metadata && user.user_metadata.negocio_id) {
-    negocioId = user.user_metadata.negocio_id;
-    return negocioId;
-  }
-  alert('No se pudo obtener el ID del negocio. Por favor, inicie sesión de nuevo.');
-  window.location.replace(Config.getRoute('login'));
-  return null;
-}
-
 
 // Utilidad: fecha local YYYY-MM-DD
 function ymdLocal(dateLike) {
@@ -38,6 +22,7 @@ function actualizarContadores(turnosHoy) {
 // Función para actualizar la tabla con los turnos del día
 function actualizarTabla(turnosHoy) {
   const tabla = document.getElementById('tablaHistorial');
+  if (!tabla) return;
   tabla.innerHTML =
     turnosHoy.length === 0
       ? `<tr><td colspan="4" class="py-4 text-center text-gray-500">No hay turnos registrados hoy.</td></tr>`
@@ -70,16 +55,14 @@ function ymdUTC(dateLike) {
 
 // Función para cargar datos y actualizar vista, devuelve los turnos del día
 async function cargarDatos() {
-  const currentNegocioId = await getNegocioId();
-  if (!currentNegocioId) return;
-
   try {
     const hoyLocal = ymdLocal(new Date());
     const hoyUTC = ymdUTC(new Date());
+
+    // RLS se encarga de filtrar por negocio_id
     const { data, error } = await supabase
       .from('turnos')
       .select('*')
-      .eq('negocio_id', currentNegocioId)
       .or(`fecha.eq.${hoyUTC},fecha.eq.${hoyLocal}`)
       .order('created_at', { ascending: false });
 
@@ -109,9 +92,6 @@ async function cargarDatos() {
 
 // Función para limpiar historial del día actual
 async function limpiarHistorialTurnos() {
-    const currentNegocioId = await getNegocioId();
-    if (!currentNegocioId) return;
-
   if (!confirm('¿Estás seguro que quieres limpiar el historial del día?')) return;
 
   const btn = document.getElementById('btnLimpiarHistorial');
@@ -122,11 +102,11 @@ async function limpiarHistorialTurnos() {
 
   try {
     btn && (btn.disabled = true, btn.textContent = 'Limpiando...');
-    // Borrar todos los turnos que ya no están activos
+
+    // RLS se encarga de filtrar por negocio_id
     const { error: deleteError } = await supabase
       .from('turnos')
       .delete()
-      .eq('negocio_id', currentNegocioId)
       .in('estado', ['Atendido', 'Cancelado', 'No presentado']);
 
     if (deleteError) throw deleteError;
@@ -150,22 +130,18 @@ async function limpiarHistorialTurnos() {
 }
 
 // Suscripción en tiempo real para actualizar datos al instante
-async function suscribirseTurnos() {
-    const currentNegocioId = await getNegocioId();
-    if (!currentNegocioId) return;
-
+function suscribirseTurnos() {
   supabase
-    .channel('canal-turnos')
+    .channel('canal-turnos-panel') // Canal con nombre único para esta página
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
         table: 'turnos',
-        filter: `negocio_id=eq.${currentNegocioId}`,
       },
       async payload => {
-        console.log('🟢 Actualización en tiempo real:', payload);
+        console.log('🟢 Actualización en tiempo real (panel):', payload);
         await cargarDatos();
       }
     )
@@ -187,9 +163,8 @@ function resaltarMenu() {
 
 // Inicialización al cargar la página
 window.addEventListener('DOMContentLoaded', async () => {
-  await getNegocioId();
   resaltarMenu();
-  cargarDatos();
+  await cargarDatos();
   suscribirseTurnos();
 });
 

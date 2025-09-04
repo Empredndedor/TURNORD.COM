@@ -414,13 +414,11 @@
   <script type="module" src="./admin/negocio.js"></script>
   <script type="module">
     import { supabase } from './database.js';
-    const negocioId = 'barberia0001';
     (async () => {
       try {
         const { data } = await supabase
           .from('configuracion_negocio')
           .select('theme_primary, theme_mode')
-          .eq('negocio_id', negocioId)
           .maybeSingle();
         if (data) {
           if (data.theme_primary) localStorage.setItem('theme_primary', data.theme_primary);
@@ -441,7 +439,6 @@
       const { data, error } = await supabase
         .from('servicios')
         .select('id,nombre,duracion_min,precio,activo')
-        .eq('negocio_id', negocioId)
         .order('activo', { ascending: false })
         .order('nombre', { ascending: true });
       if (error) {
@@ -478,7 +475,7 @@
       if (!nombre || !dur || dur < 1) return;
       const { error } = await supabase
         .from('servicios')
-        .insert([{ negocio_id: negocioId, nombre, duracion_min: dur, precio, activo }]);
+        .insert([{ nombre, duracion_min: dur, precio, activo }]);
       if (error) {
         alert('Error al agregar servicio: ' + error.message);
         return;
@@ -541,7 +538,7 @@
       .channel('servicios-negocio')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'servicios', filter: `negocio_id=eq.${negocioId}` },
+        { event: '*', schema: 'public', table: 'servicios' },
         () => cargarServicios()
       )
       .subscribe();
