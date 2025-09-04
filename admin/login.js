@@ -20,18 +20,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       throw error;
     }
 
-    // Asignar el negocio_id al usuario después del login exitoso
-    if (data.user) {
-      const negocioConfig = Config.getNegocioConfig();
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { negocio_id: negocioConfig.id }
-      });
-      
-      if (updateError) {
-        console.warn('No se pudo actualizar el negocio_id:', updateError.message);
-      }
-    }
-
     // Si el login es exitoso, Supabase guarda la sesión.
     // Redirigir al panel de administración usando configuración centralizada.
     window.location.replace(Config.getRoute('panel'));

@@ -1,30 +1,21 @@
+// auth-guard.js
+// Este script protege las páginas de administración.
+// Comprueba si hay una sesión de usuario activa y, de no ser así,
+// redirige a la página de inicio de sesión.
 
-
-
-// auto.js
 import { supabase } from './database.js';
 
 (async () => {
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
+  const { data: { session }, error } = await supabase.auth.getSession();
 
-  if (!session) {
-    // No hay sesión activa, redirigir al login
-    window.location.replace('login.html');
-    return;
+  if (error) {
+    console.error('Error al obtener la sesión:', error);
   }
 
-  // Hay sesión, obtenemos el usuario
-  const user = session.user;
-
-  // Guardamos el UUID de Supabase en localStorage
-  localStorage.setItem('userId', user.id);
-
-  // Si quieres usar un ID fijo de negocio (barberia0001)
-  localStorage.setItem('businessId', 'barberia0001');
-
-  console.log('Usuario autenticado:', user.email);
-  console.log('UUID de usuario guardado:', user.id);
-  console.log('ID de negocio guardado:', 'barberia0001');
+  if (!session) {
+    // No hay sesión activa, redirigir al login.
+    // El `replace` evita que el usuario pueda volver con el botón de "atrás".
+    window.location.replace('login.html');
+  }
+  // Si hay una sesión, el script no hace nada y permite que la página se cargue normalmente.
 })();
